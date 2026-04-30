@@ -7,7 +7,7 @@ from skimage.metrics import structural_similarity as ssim
 import warnings
 import logging
 
-# --- SILENCE ALL ANNOYING WARNINGS LPIPS IS ANNOYING GODDAM ---
+#SILENCE ALL ANNOYING WARNINGS LPIPS IS ANNOYING GODDAM
 warnings.filterwarnings("ignore")
 logging.getLogger("lpips").setLevel(logging.ERROR)
 
@@ -15,7 +15,7 @@ os.makedirs("images", exist_ok=True)
 os.makedirs("models", exist_ok=True)
 os.makedirs("results", exist_ok=True)
 
-# Global singleton to hold LPIPS so it only loads ONCE per session
+#Global singleton to hold LPIPS so it only loads ONCE per session
 _GLOBAL_LPIPS_MODEL = None
 
 class MetricsEngine:
@@ -26,7 +26,7 @@ class MetricsEngine:
         try:
             import lpips
             if _GLOBAL_LPIPS_MODEL is None:
-                # Capture standard output to mute the "Loading model..." text
+                #Capture standard output to mute the "Loading model..." text
                 import sys, io
                 old_stdout = sys.stdout
                 sys.stdout = io.StringIO()
@@ -41,7 +41,7 @@ class MetricsEngine:
         except ImportError:
             self.has_lpips = False
             print("LPIPS not installed.")
-
+    #computes mse osnr and self defined nce(idk if ill use this tho, its kinda basic)
     def compute_all(self, img_true, img_pred):
         mse = np.mean((img_true.astype(np.float64) - img_pred.astype(np.float64)) ** 2)
         psnr = float('inf') if mse == 0 else 20 * np.log10(255.0 / np.sqrt(mse))
@@ -50,7 +50,7 @@ class MetricsEngine:
         
         img_true_flat = img_true.flatten()
         img_pred_flat = img_pred.flatten()
-        nce = np.corrcoef(img_true_flat, img_pred_flat)[0, 1]
+        nce = np.corrcoef(img_true_flat, img_pred_flat)[0, 1] #Ignore this, I wanted to make my own metric but others are much better
 
         lpips_val = 0.0
         if self.has_lpips:
@@ -61,6 +61,7 @@ class MetricsEngine:
 
         return {"PSNR": psnr, "SSIM": ssim_val, "NCE": nce, "LPIPS": lpips_val}
 
+#compares any 2 images
 def visual_compare(img_path_a, img_path_b, title_a="Original", title_b="Compressed"):
     img_a = cv2.cvtColor(cv2.imread(img_path_a), cv2.COLOR_BGR2RGB)
     img_b = cv2.cvtColor(cv2.imread(img_path_b), cv2.COLOR_BGR2RGB)
