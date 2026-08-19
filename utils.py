@@ -7,7 +7,7 @@ from skimage.metrics import structural_similarity as ssim
 import warnings
 import logging
 
-#SILENCE ALL ANNOYING WARNINGS LPIPS IS ANNOYING GODDAM
+#silences lpips warnings
 warnings.filterwarnings("ignore")
 logging.getLogger("lpips").setLevel(logging.ERROR)
 
@@ -34,14 +34,14 @@ class MetricsEngine:
                 _GLOBAL_LPIPS_MODEL = lpips.LPIPS(net='vgg').to(device)
                 _GLOBAL_LPIPS_MODEL.eval()
                 
-                sys.stdout = old_stdout # Restore printing
+                sys.stdout = old_stdout #Restore printing
             
             self.loss_fn_vgg = _GLOBAL_LPIPS_MODEL
             self.has_lpips = True
         except ImportError:
             self.has_lpips = False
             print("LPIPS not installed.")
-    #computes mse osnr and self defined nce(idk if ill use this tho, its kinda basic)
+    #computes mse osnr and self defined nce
     def compute_all(self, img_true, img_pred):
         mse = np.mean((img_true.astype(np.float64) - img_pred.astype(np.float64)) ** 2)
         psnr = float('inf') if mse == 0 else 20 * np.log10(255.0 / np.sqrt(mse))
@@ -50,7 +50,7 @@ class MetricsEngine:
         
         img_true_flat = img_true.flatten()
         img_pred_flat = img_pred.flatten()
-        nce = np.corrcoef(img_true_flat, img_pred_flat)[0, 1] #Ignore this, I wanted to make my own metric but others are much better
+        nce = np.corrcoef(img_true_flat, img_pred_flat)[0, 1] #experimental metric i made nce, unused in final eval
 
         lpips_val = 0.0
         if self.has_lpips:
